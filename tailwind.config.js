@@ -15,10 +15,13 @@ module.exports = {
                 'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
             },
             backgroundColor: {
-                backtheme: '#121214'
+                backtheme: '#121214',
+                newgradiente: 'linear-gradient(180deg, #1EA483 0%, #7465D4 100%)'
             },
             height: {
-                656: '656px'
+                656: '656px',
+                93: '93px',
+                69: '69px'
             },
             maxWidth: {
                 calc: 'calc(100vw - (100vw - 1180px)/2)'
@@ -35,6 +38,22 @@ module.exports = {
             },
             fontSize: {
                 price: '32px'
+            },
+            width: {
+                480: '480px',
+                101: '101'
+            },
+            padding: {
+                18: '72px'
+            },
+            boxShadow: {
+                cart: '-4px 0px 30px rgba(0, 0, 0, 0.8)'
+            },
+            minWidth: {
+                696: '696px'
+            },
+            boxShadow: {
+                success: "0px 0px 60px rgba(0, 0, 0, 0.8)",
             }
         },
     },

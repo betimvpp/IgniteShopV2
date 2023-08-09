@@ -4,41 +4,18 @@ import { stripe } from "@/lib/stripe"
 import { GetStaticPaths, GetStaticProps } from "next"
 
 import Stripe from "stripe"
-import axios from "axios"
-import { useState } from "react"
 import Head from "next/head"
+import { useCart } from "@/hooks/useCart"
+import { IProduct } from "@/contexts/CartContext"
 
 interface ProductProps{
-  product : {
-    id: string
-    name: string
-    imageUrl: string
-    price: string
-    description: string
-    defaultPriceId: string
-  }
+  product : IProduct;
 }
 
 export default function Products  ({product}: ProductProps)  {
-  const [isCreatingCheckoutSession, setIsCreatingCheckoutSession] = useState(false)
+  const {addToCart, checkIfItemAlreadyExists} = useCart();
 
- async function handleCheckout (){
-  try {
-    setIsCreatingCheckoutSession(true)
-
-    const response = await axios.post('/api/checkout',{
-      priceId: product.defaultPriceId,
-    })
-
-    const {checkoutUrl} = response.data;
-
-    window.location.href = checkoutUrl
-  }catch(err){
-    setIsCreatingCheckoutSession(false)
-
-    alert(err + 'Falha ao redirecionar ao checkou!')
-  }
- }
+  const itemAlreadyExist = checkIfItemAlreadyExists(product?.id);
 
   return (
     <>
@@ -62,7 +39,12 @@ export default function Products  ({product}: ProductProps)  {
             {product?.description}
             </p>
 
-            <button onClick={handleCheckout} className="mt-auto w-full bg-green-500 border-none text-white rounded-lg p-5 cursor-pointer  font-bold text-lg enabled:hover:bg-green-600 enabled:duration-200  disabled:opacity-60 disabled:cursor-not-allowed" disabled={isCreatingCheckoutSession}>Comprar Agora</button>
+            <button 
+            onClick={()=>addToCart(product)} 
+            className="mt-auto w-full bg-green-500 border-none text-white rounded-lg p-5 cursor-pointer  font-bold text-lg enabled:hover:bg-green-600 enabled:duration-200  disabled:opacity-60 disabled:cursor-not-allowed" 
+            disabled={itemAlreadyExist}>
+              {itemAlreadyExist? 'Produto já está no carrinho' : 'Adcionar ao carrinho'}
+              </button>
           </div>
       </div>
    </>
@@ -95,6 +77,7 @@ export const getStaticProps: GetStaticProps<any, {id: string}> = async ({params}
         style: 'currency',
         currency: 'BRL'
         }).format(price.unit_amount!/100),
+        numberPrice: price.unit_amount!/100,
         description: product.description,
         defaultPriceId: price.id,
       }

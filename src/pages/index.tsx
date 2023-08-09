@@ -11,15 +11,14 @@ import Stripe from 'stripe'
 import { stripe } from '@/lib/stripe'
 import Link from 'next/link'
 import Head from 'next/head'
+import { CartButton } from '@/components/CartButton'
+import { useCart } from '@/hooks/useCart'
+import { IProduct } from '@/contexts/CartContext'
+import { MouseEvent } from 'react'
 
 
 export interface HomeProps{
-  products : {
-    id: string
-    name: string
-    imageUrl: string
-    price: string
-  }[]
+  products : IProduct[]
 }
 
 export default function Home({products}: HomeProps) {
@@ -29,6 +28,13 @@ export default function Home({products}: HomeProps) {
       spacing:48
     }
   })  
+
+  const {addToCart, checkIfItemAlreadyExists } = useCart();
+
+  function handleAddtoCart(e: MouseEvent<HTMLButtonElement>, product: IProduct){
+    e.preventDefault();
+    addToCart(product);
+  }
 
   return (
     <>
@@ -44,13 +50,21 @@ export default function Home({products}: HomeProps) {
           key={product.id}
           href={`/Products/${product.id}`}>
             <div 
-            className='keen-slider__slide group min-w-540 flex items-center overflow-hidden justify-center flex-col relative rounded-lg cursor-pointer bg-gradient-to-b from-cyan-500 from-0% to-purple-500 to-100%' 
-            >
+            className='keen-slider__slide group min-w-540 flex items-center overflow-hidden justify-center flex-col relative rounded-lg cursor-pointer bg-gradient-to-b from-cyan-500 from-0% to-purple-500 to-100%' >
               <Image className='object-cover' src={product.imageUrl} alt='' width={520} height={480}/>
-              <footer className='translate-y-full  opacity-0 transition-all ease-in-out duration-200 bg-black/60 p-8 absolute bottom-1 left-1 right-1 rounded-md flex items-center justify-between group-hover:translate-y-0 group-hover:opacity-100'>
-                <strong className='text-lg text-gray-100 font-bold'>{product.name}</strong>
-                <span className='text-green-500 font-bold text-2xl'>{product.price}</span>
-              </footer>
+                            
+                <footer className='translate-y-full  opacity-0 transition-all ease-in-out duration-200 bg-black/60 p-8 absolute bottom-1 left-1 right-1 rounded-md flex items-center justify-between group-hover:translate-y-0 group-hover:opacity-100'>
+                  <div className='flex flex-col gap-1'>
+                    <strong className='text-lg text-gray-100 font-bold'>{product.name}</strong>
+                    <span className='text-green-500 font-bold text-2xl'>{product.price}</span>
+                  </div>
+                  <CartButton 
+                  color={'green'} 
+                  size={'large'} 
+                  onClick={(e)=> handleAddtoCart(e, product)}
+                  disabled={checkIfItemAlreadyExists(product.id)}
+                  />
+                </footer>              
             </div>
           </Link>
         )
@@ -76,6 +90,8 @@ export const getStaticProps: GetStaticProps = async () => {
         style: 'currency',
         currency: 'BRL'
       }).format(price.unit_amount!/100),
+      numberPrice: price.unit_amount!/100,
+      defaultPriceId: price.id
     }
   })
 
